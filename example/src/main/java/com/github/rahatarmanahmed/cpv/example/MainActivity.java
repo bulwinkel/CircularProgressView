@@ -65,6 +65,13 @@ public class MainActivity extends Activity {
                 startAnimationThreadStuff(0);
             }
         });
+
+        final Button bgColorButton = (Button) findViewById(R.id.bgColorButton);
+        bgColorButton.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                progressView.setBackgroundColorEnabled(!progressView.isBackgroundColorEnabled());
+            }
+        });
     }
 
     private void startAnimationThreadStuff(long delay) {

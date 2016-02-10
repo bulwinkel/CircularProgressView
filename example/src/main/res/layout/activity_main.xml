@@ -51,5 +51,12 @@
         android:layout_centerHorizontal="true"
         android:text="Switch to Determinate" />
 
+    <Button
+        android:id="@+id/bgColorButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button"
+        android:layout_centerHorizontal="true"
+        android:text="Toggle Background" />
 
 </RelativeLayout>

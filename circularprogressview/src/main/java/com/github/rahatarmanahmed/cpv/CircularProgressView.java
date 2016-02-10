@@ -28,14 +28,16 @@ import java.util.List;
 public class CircularProgressView extends View {
 
     private static final float INDETERMINANT_MIN_SWEEP = 15f;
-    
-    private Paint paint;
+
+    private Paint paint, bgPaint;
     private int size = 0;
     private RectF bounds;
 
+    private boolean bgColorEnabled = false;
+
     private boolean isIndeterminate, autostartAnimation;
     private float currentProgress, maxProgress, indeterminateSweep, indeterminateRotateOffset;
-    private int thickness, color, animDuration, animSwoopDuration, animSyncDuration, animSteps;
+    private int thickness, color, bgColor, animDuration, animSwoopDuration, animSyncDuration, animSteps;
 
     private List<CircularProgressViewListener> listeners;
     // Animation related stuff
@@ -116,6 +118,14 @@ public class CircularProgressView extends View {
             color = resources.getColor(R.color.cpv_default_color);
         }
 
+        final int default_bg_color = resources.getColor(R.color.cpv_default_bg_color);
+        if (a.hasValue(R.styleable.CircularProgressView_cpv_backgroundColor)) {
+            bgColorEnabled = true;
+            bgColor = a.getColor(R.styleable.CircularProgressView_cpv_backgroundColor, default_bg_color);
+        } else {
+            bgColor = default_bg_color;
+        }
+
         animDuration = a.getInteger(R.styleable.CircularProgressView_cpv_animDuration,
                 resources.getInteger(R.integer.cpv_default_anim_duration));
         animSwoopDuration = a.getInteger(R.styleable.CircularProgressView_cpv_animSwoopDuration,
@@ -159,18 +169,33 @@ public class CircularProgressView extends View {
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(thickness);
         paint.setStrokeCap(Paint.Cap.BUTT);
+
+        if (bgColorEnabled) {
+            bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            bgPaint.setColor(bgColor);
+            bgPaint.setStyle(paint.getStyle());
+            bgPaint.setStrokeWidth(paint.getStrokeWidth());
+            bgPaint.setStrokeCap(paint.getStrokeCap());
+        } else {
+            bgPaint = null;
+        }
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        if (bgPaint != null) {
+            canvas.drawArc(bounds, 0, 360, false, bgPaint);
+        }
+
         // Draw the arc
         float sweepAngle = (isInEditMode()) ? currentProgress/maxProgress*360 : actualProgress/maxProgress*360;
-        if(!isIndeterminate)
+        if(!isIndeterminate) {
             canvas.drawArc(bounds, startAngle, sweepAngle, false, paint);
-        else
+        } else {
             canvas.drawArc(bounds, startAngle + indeterminateRotateOffset, indeterminateSweep, false, paint);
+        }
     }
 
     /**
@@ -232,6 +257,22 @@ public class CircularProgressView extends View {
      */
     public void setColor(int color) {
         this.color = color;
+        updatePaint();
+        invalidate();
+    }
+
+    public void setBackgroundColorEnabled(boolean enabled) {
+        bgColorEnabled = enabled;
+        updatePaint();
+        invalidate();
+    }
+
+    public boolean isBackgroundColorEnabled() { return bgColorEnabled; }
+
+    public int getBackgroundColor() { return bgColor; }
+
+    public void setBackgroundColor(int color) {
+        this.bgColor = color;
         updatePaint();
         invalidate();
     }
