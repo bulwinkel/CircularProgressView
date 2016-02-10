@@ -45,6 +45,7 @@ progressView.startAnimation();
 | cpv_maxProgress | float | 100 | The maximum progress of the progress bar; what's considered as 100% of the bar. |
 | cpv_thickness | dimension | 4px | The thickness of the progress bar. |
 | cpv_color | color | Theme's accent color. If not available, Material Blue 500 (#2196F3) | The color of the progress bar. |
+| cpv_backgroundColor | color | None | The background color of the progress bar. |
 | cpv_indeterminate | boolean | false | Whether this progress bar is indeterminate or not. If indeterminate, the progress set on this view will not have any effect. |
 | cpv_animDuration | integer | 4000 | The duration of the indeterminate progress bar animation in milliseconds. It is the duration of all "steps" of the indeterminate animation. (Indeterminate only) |
 | cpv_animSwoopDuration | integer | 5000 | The duration of the initial swoop of the determinate animation. (Determinate only) |
@@ -63,6 +64,10 @@ progressView.startAnimation();
 | setThickness(int) | Sets thickness of the progress bar. |
 | getColor() | Gets the color of the progress bar. |
 | setColor(int) | Sets the color of the progress bar. |
+| getProgressBackgroundColor() | Gets the background color of the progress bar. |
+| setProgressBackgroundColor(int) | Sets the background color of the progress bar. |
+| isProgressBackgroundColorEnabled() | true if the background of the progressbar is enabled. |
+| setProgressBackgroundColorEnabled(boolean) | enables/disables the background color of the progressbar |
 | getMaxProgress() | Gets the maximum progress of the progress bar. |
 | setMaxProgress(float) | Sets the maximum progress of the progress bar. |
 | getProgress() | Gets the current progress of the progress bar. |
@@ -71,6 +76,7 @@ progressView.startAnimation();
 | resetAnimation() | Resets the animation of the progress bar. |
 | addListener(CircularProgressViewListener) | Registers a CircularProgressViewListener with this view. |
 | removeListener(CircularProgressViewListener) | Unregisters a CircularProgressViewListener with this view. |
+
 
 ## Listener Events.
 

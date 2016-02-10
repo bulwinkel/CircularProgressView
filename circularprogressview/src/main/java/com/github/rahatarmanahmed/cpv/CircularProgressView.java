@@ -261,21 +261,23 @@ public class CircularProgressView extends View {
         invalidate();
     }
 
-    public void setBackgroundColorEnabled(boolean enabled) {
+    public void setProgressBackgroundColorEnabled(boolean enabled) {
         bgColorEnabled = enabled;
         updatePaint();
         invalidate();
     }
 
-    public boolean isBackgroundColorEnabled() { return bgColorEnabled; }
+    public boolean isProgressBackgroundColorEnabled() { return bgColorEnabled; }
 
-    public int getBackgroundColor() { return bgColor; }
+    public int getProgressBackgroundColor() { return bgColor; }
 
-    public void setBackgroundColor(int color) {
+    public void setProgressBackgroundColor(int color) {
         this.bgColor = color;
         updatePaint();
         invalidate();
     }
+
+
 
     /**
      * Gets the progress value considered to be 100% of the progress bar.
