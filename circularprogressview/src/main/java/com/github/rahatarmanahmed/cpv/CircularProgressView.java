@@ -609,10 +609,8 @@ public class CircularProgressView extends View {
 
         //// calculate the point for the tracking dot
         final float radius = bounds.centerX() - (thickness * trackingDotMultiplier);
-        // have to subtract 90 because to move the start point of the calculate to the top
-        // from the side (standard for Math library)
-        final float angle = degreesToRadians((degrees-90));
-        trackingDotPoint = Point.of(center.x + radius * Math.cos(angle), center.y + radius * Math.sin(angle));
+
+        calculateTrackingDotPoint(center, degrees, radius);
 
         //// set the progress based on the touch event
         final float newProgress = degrees / 360 * maxProgress;
@@ -653,6 +651,13 @@ public class CircularProgressView extends View {
         }
 
         return false;
+    }
+
+    private void calculateTrackingDotPoint(Point center, float degrees, float radius) {
+        // have to subtract 90 because to move the start point of the calculate to the top
+        // from the side (standard for Math library)
+        final float angle = degreesToRadians((degrees-90));
+        trackingDotPoint = Point.of(center.x + radius * Math.cos(angle), center.y + radius * Math.sin(angle));
     }
 
     private static float square(float value) {
