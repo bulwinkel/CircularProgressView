@@ -14,6 +14,7 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
@@ -309,31 +310,44 @@ public class CircularProgressView extends View {
      * @param currentProgress the new progress.
      */
     public void setProgress(final float currentProgress) {
+        setProgress(currentProgress, true);
+    }
+
+    public void setProgress(final float currentProgress, final boolean animated) {
         this.currentProgress = currentProgress;
         // Reset the determinate animation to approach the new currentProgress
         if (!isIndeterminate) {
-            if (progressAnimator != null && progressAnimator.isRunning())
-                progressAnimator.cancel();
-            progressAnimator = ValueAnimator.ofFloat(actualProgress, currentProgress);
-            progressAnimator.setDuration(animSyncDuration);
-            progressAnimator.setInterpolator(new LinearInterpolator());
-            progressAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    actualProgress = (Float) animation.getAnimatedValue();
-                    invalidate();
-                }
-            });
-            progressAnimator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    for(CircularProgressViewListener listener : listeners) {
-                        listener.onProgressUpdateEnd(currentProgress);
-                    }
-                }
-            });
 
-            progressAnimator.start();
+            // always need to cancel the current animation if running
+            // regardless of whether the new progress is animated
+            if (progressAnimator != null && progressAnimator.isRunning()) {
+                progressAnimator.cancel();
+            }
+
+            if (!animated) {
+                actualProgress = currentProgress;
+            } else {
+                progressAnimator = ValueAnimator.ofFloat(actualProgress, currentProgress);
+                progressAnimator.setDuration(animSyncDuration);
+                progressAnimator.setInterpolator(new LinearInterpolator());
+                progressAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        actualProgress = (Float) animation.getAnimatedValue();
+                        invalidate();
+                    }
+                });
+                progressAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        for(CircularProgressViewListener listener : listeners) {
+                            listener.onProgressUpdateEnd(currentProgress);
+                        }
+                    }
+                });
+
+                progressAnimator.start();
+            }
         }
         invalidate();
         for(CircularProgressViewListener listener : listeners) {
@@ -531,5 +545,121 @@ public class CircularProgressView extends View {
             indeterminateAnimator.cancel();
             indeterminateAnimator = null;
         }
+    }
+
+    // NOT SURE IF THIS IS A GOOD IDEA, NO IDEA WHAT VALID POINTER ID RANGE IS
+    private static final int INVALID_POINTER_ID = Integer.MIN_VALUE;
+    private static final float INVALID_TOUCH_VALUE = Float.MIN_VALUE;
+
+    private int activePointerId = INVALID_POINTER_ID;
+    private float lastTouchX = INVALID_TOUCH_VALUE;
+    private float lastTouchY = INVALID_TOUCH_VALUE;
+
+    @Override public boolean onTouchEvent(MotionEvent ev) {
+
+        // keep tracking the touch event until it ends even if it
+        // goes off the progress bar
+
+        //Log.d(getClass().getSimpleName(), "onTouchEvent");
+        //Log.d(getClass().getSimpleName(), "action = " + ev.getAction());
+        //Log.d(getClass().getSimpleName(), "actionMasked = " + ev.getActionMasked());
+
+        final int pointerIndex = ev.getActionIndex();
+        final float x = ev.getX(pointerIndex);
+        final float y = ev.getY(pointerIndex);
+
+        final Point center = Point.of(bounds.centerX(), bounds.centerY());
+        final Point vertical = Point.of(bounds.centerX(), bounds.top);
+        final Point touch = Point.of(x, y);
+
+        float degrees = angle(center, vertical, touch);
+        Log.d(getClass().getSimpleName(), "degrees = " + degrees);
+
+        //// set the progress based on the touch event
+        final float newProgress = degrees / 360 * maxProgress;
+
+        final int action = ev.getActionMasked();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+
+                lastTouchX = x;
+                lastTouchY = y;
+
+                activePointerId = ev.getPointerId(pointerIndex);
+                final boolean isTouchingBar = isPointTouchingBar(bounds, (thickness * 2), x, y);
+                Log.d(getClass().getSimpleName(), "isTouchingBar: " + isTouchingBar);
+
+                //// set the progress based on the touch event
+                setProgress(newProgress);
+
+                //Log.d(getClass().getSimpleName(), "view.x = " + getX());
+                //Log.d(getClass().getSimpleName(), "view.y = " + getY());
+                //Log.d(getClass().getSimpleName(), "bounds.x = " + bounds.left);
+                //Log.d(getClass().getSimpleName(), "bounds.y = " + bounds.top);
+                //Log.d(getClass().getSimpleName(), "bounds.width = " + (bounds.left + bounds.right));
+                //Log.d(getClass().getSimpleName(), "bounds.height = " + (bounds.top + bounds.bottom));
+                //
+                //Log.d(getClass().getSimpleName(), "touch.x = " + ev.getX());
+                //Log.d(getClass().getSimpleName(), "touch.y = " + ev.getY());
+
+                // calculate if the initial touch event is on the progress bar
+                // if not return false to pass on the touch event
+                return isTouchingBar;
+
+            case MotionEvent.ACTION_MOVE:
+
+                //// set the progress based on the touch event
+                setProgress(newProgress, false);
+
+                return true;
+
+            case MotionEvent.ACTION_UP:
+
+                activePointerId = INVALID_POINTER_ID;
+                return true;
+
+        }
+
+        return false;
+    }
+
+    private static float square(float value) {
+        return value * value;
+    }
+
+    private static float radiansToDegrees(float value) {
+        return (float) (value * 180.0 / Math.PI);
+    }
+
+    private static float angle( final Point centre, final Point vertical, final Point touch) {
+
+        final float side1to2 = centre.distance(vertical);
+        final float side1to3 = centre.distance(touch);
+        final float side2to3 = vertical.distance(touch);
+
+        final float radians = (float) Math.acos((square(side1to2) + square(side1to3) - square(side2to3)) / (2 * side1to2 * side1to3));
+
+        // need to work out if we are past 180deg otherwise the above formula starts
+        // counting down from 180 (instead of up to 360)
+        if (touch.x >= centre.x) return radiansToDegrees(radians);
+        else return 360 - radiansToDegrees(radians);
+    }
+
+    private boolean isPointTouchingBar(RectF bounds, int thickness, float x, float y) {
+
+        // assuming the bounds is a square
+        final float radius = bounds.centerX();
+        Log.d(getClass().getSimpleName(), "radius = " + radius);
+
+        // distance between touch and centre of bounds
+        final float xDist = x - bounds.centerX();
+        final float yDist = y - bounds.centerY();
+        final float dist = (float)Math.sqrt((xDist * xDist) + (yDist * yDist));
+
+        Log.d(getClass().getSimpleName(), "distance = " + dist);
+
+
+
+        return dist <= radius && dist >= (radius - thickness);
     }
 }
