@@ -30,6 +30,7 @@ import java.util.List;
 public class CircularProgressView extends View {
 
     private static final float INDETERMINANT_MIN_SWEEP = 15f;
+    private static final float DEFAULT_TRACKING_DOT_MULTIPLIER = 2f;
 
     private Paint paint, bgPaint, tdPaint, tdcPaint; //td = tracking dot
     private int size = 0;
@@ -41,6 +42,8 @@ public class CircularProgressView extends View {
     private boolean isIndeterminate, autostartAnimation;
     private float currentProgress, maxProgress, indeterminateSweep, indeterminateRotateOffset;
     private int thickness, color, bgColor, animDuration, animSwoopDuration, animSyncDuration, animSteps;
+
+    private float trackingDotMultiplier = DEFAULT_TRACKING_DOT_MULTIPLIER;
 
     private List<CircularProgressViewListener> listeners;
     // Animation related stuff
@@ -164,9 +167,16 @@ public class CircularProgressView extends View {
 
     private void updateBounds()
     {
-        int paddingLeft = getPaddingLeft();
-        int paddingTop = getPaddingTop();
-        bounds.set(paddingLeft + thickness, paddingTop + thickness, size - paddingLeft - thickness, size - paddingTop - thickness);
+        final int paddingLeft = getPaddingLeft();
+        final int paddingTop = getPaddingTop();
+
+        final int thickness = (int) (this.thickness * trackingDotMultiplier);
+
+        final int left = paddingLeft + thickness;
+        final int top = paddingTop + thickness;
+        final int right = size - paddingLeft - thickness;
+        final int bottom = size - paddingTop - thickness;
+        bounds.set(left, top, right, bottom);
     }
 
     private void updatePaint()
@@ -217,7 +227,7 @@ public class CircularProgressView extends View {
 
         if (drawTrackingDot) {
             final Point pt = trackingDotPoint;
-            canvas.drawCircle(pt.x, pt.y, (2 * thickness), tdPaint);
+            canvas.drawCircle(pt.x, pt.y, (thickness * trackingDotMultiplier), tdPaint);
             canvas.drawCircle(pt.x, pt.y, (thickness / 3), tdcPaint);
         }
     }
@@ -598,7 +608,7 @@ public class CircularProgressView extends View {
         float degrees = angle(center, vertical, touch);
 
         //// calculate the point for the tracking dot
-        final float radius = bounds.centerX() - thickness;
+        final float radius = bounds.centerX() - (thickness * trackingDotMultiplier);
         // have to subtract 90 because to move the start point of the calculate to the top
         // from the side (standard for Math library)
         final float angle = degreesToRadians((degrees-90));
@@ -612,7 +622,7 @@ public class CircularProgressView extends View {
             case MotionEvent.ACTION_DOWN:
 
                 activePointerId = ev.getPointerId(pointerIndex);
-                final boolean isTouchingBar = isPointTouchingBar(bounds, (thickness * 2), x, y);
+                final boolean isTouchingBar = isPointTouchingBar(radius, center, touch, .2f);
                 Log.d(getClass().getSimpleName(), "isTouchingBar: " + isTouchingBar);
 
                 //// set the progress based on the touch event
@@ -668,19 +678,12 @@ public class CircularProgressView extends View {
         else return 360 - radiansToDegrees(radians);
     }
 
-    private boolean isPointTouchingBar(RectF bounds, int thickness, float x, float y) {
+    // leewayMultipler should be a fraction < 1 to calc the percentage leeway
+    private boolean isPointTouchingBar(final float radius, final Point center, final Point touch, final float leewayMultipler) {
 
-        // assuming the bounds is a square
-        final float radius = bounds.centerX();
-        Log.d(getClass().getSimpleName(), "radius = " + radius);
+        final float dist = touch.distance(center);
+        final float leeway = radius * leewayMultipler;
 
-        // distance between touch and centre of bounds
-        final float xDist = x - bounds.centerX();
-        final float yDist = y - bounds.centerY();
-        final float dist = (float)Math.sqrt((xDist * xDist) + (yDist * yDist));
-
-        Log.d(getClass().getSimpleName(), "distance = " + dist);
-
-        return dist <= radius && dist >= (radius - thickness);
+        return (radius - leeway) <= dist && dist <= (radius + leeway);
     }
 }
