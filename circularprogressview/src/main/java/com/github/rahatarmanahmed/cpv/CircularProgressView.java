@@ -568,7 +568,6 @@ public class CircularProgressView extends View {
 
     // NOT SURE IF THIS IS A GOOD IDEA, NO IDEA WHAT VALID POINTER ID RANGE IS
     private static final int INVALID_POINTER_ID = Integer.MIN_VALUE;
-    private static final float INVALID_TOUCH_VALUE = Float.MIN_VALUE;
 
     private int activePointerId = INVALID_POINTER_ID;
 
@@ -576,6 +575,9 @@ public class CircularProgressView extends View {
     private Point trackingDotPoint = Point.EMPTY;
 
     @Override public boolean onTouchEvent(MotionEvent ev) {
+
+        //GUARD - no touch events when indeterminate
+        if (isIndeterminate()) return false;
 
         final int pointerIndex = ev.getActionIndex();
         final float x = ev.getX(pointerIndex);
