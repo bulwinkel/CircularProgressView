@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import android.widget.Toast;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.github.rahatarmanahmed.cpv.CircularProgressViewAdapter;
 
@@ -77,6 +78,13 @@ public class MainActivity extends Activity {
         progAdjustableButton.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 progressView.setProgressAdjustable(!progressView.isProgressAdjustable());
+            }
+        });
+
+        final Button testButton = (Button) findViewById(R.id.testButton);
+        testButton.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "Test", Toast.LENGTH_SHORT).show();
             }
         });
     }
