@@ -624,11 +624,10 @@ public class CircularProgressView extends View {
                 Log.d(getClass().getSimpleName(), "isTouchingBar: " + isTouchingBar);
 
                 //// set the progress based on the touch event
+                drawTrackingDot = isTouchingBar;
                 if (isTouchingBar) {
                     setProgress(newProgress);
                 }
-
-                drawTrackingDot = true;
 
                 // calculate if the initial touch event is on the progress bar
                 // if not return false to pass on the touch event
