@@ -1,11 +1,18 @@
 package com.github.rahatarmanahmed.cpv;
 
 final class Point {
+
+  public static final Point EMPTY = Point.of(Float.MAX_VALUE, Float.MAX_VALUE);
+
   public final float x;
   public final float y;
 
   public static Point of(float x, float y) {
     return new Point(x, y);
+  }
+
+  public static Point of(double x, double y) {
+    return new Point((float)x, (float)y);
   }
 
   private Point(float x, float y) {
@@ -22,5 +29,9 @@ final class Point {
 
   private static float square(float value) {
     return value * value;
+  }
+
+  @Override public String toString() {
+    return "x = " + x + " y = " + y;
   }
 }

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Build;
@@ -30,7 +31,7 @@ public class CircularProgressView extends View {
 
     private static final float INDETERMINANT_MIN_SWEEP = 15f;
 
-    private Paint paint, bgPaint;
+    private Paint paint, bgPaint, tdPaint, tdcPaint; //td = tracking dot
     private int size = 0;
     private RectF bounds;
 
@@ -169,7 +170,19 @@ public class CircularProgressView extends View {
         paint.setColor(color);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(thickness);
-        paint.setStrokeCap(Paint.Cap.BUTT);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+
+        if (tdPaint == null) {
+            tdPaint = new Paint(paint.getFlags());
+        }
+        tdPaint.setStyle(Paint.Style.FILL);
+        tdPaint.setColor(Colors.adjustAlpha(paint.getColor(), 0.8f));
+
+        if (tdcPaint == null) {
+            tdcPaint = new Paint(paint.getFlags());
+        }
+        tdcPaint.setStyle(Paint.Style.FILL);
+        tdcPaint.setColor(Color.WHITE);
 
         if (bgColorEnabled) {
             bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -196,6 +209,12 @@ public class CircularProgressView extends View {
             canvas.drawArc(bounds, startAngle, sweepAngle, false, paint);
         } else {
             canvas.drawArc(bounds, startAngle + indeterminateRotateOffset, indeterminateSweep, false, paint);
+        }
+
+        if (drawTrackingDot) {
+            final Point pt = trackingDotPoint;
+            canvas.drawCircle(pt.x, pt.y, (2 * thickness), tdPaint);
+            canvas.drawCircle(pt.x, pt.y, (thickness / 3), tdcPaint);
         }
     }
 
@@ -552,17 +571,11 @@ public class CircularProgressView extends View {
     private static final float INVALID_TOUCH_VALUE = Float.MIN_VALUE;
 
     private int activePointerId = INVALID_POINTER_ID;
-    private float lastTouchX = INVALID_TOUCH_VALUE;
-    private float lastTouchY = INVALID_TOUCH_VALUE;
+
+    private boolean drawTrackingDot = false;
+    private Point trackingDotPoint = Point.EMPTY;
 
     @Override public boolean onTouchEvent(MotionEvent ev) {
-
-        // keep tracking the touch event until it ends even if it
-        // goes off the progress bar
-
-        //Log.d(getClass().getSimpleName(), "onTouchEvent");
-        //Log.d(getClass().getSimpleName(), "action = " + ev.getAction());
-        //Log.d(getClass().getSimpleName(), "actionMasked = " + ev.getActionMasked());
 
         final int pointerIndex = ev.getActionIndex();
         final float x = ev.getX(pointerIndex);
@@ -575,15 +588,19 @@ public class CircularProgressView extends View {
         float degrees = angle(center, vertical, touch);
         Log.d(getClass().getSimpleName(), "degrees = " + degrees);
 
+        //// calculate the point for the tracking dot
+        final float radius = bounds.centerX() - thickness;
+        // have to subtract 90 because to move the start point of the calculate to the top
+        // from the side (standard for Math library)
+        final float angle = degreesToRadians((degrees-90));
+        trackingDotPoint = Point.of(center.x + radius * Math.cos(angle), center.y + radius * Math.sin(angle));
+
         //// set the progress based on the touch event
         final float newProgress = degrees / 360 * maxProgress;
 
         final int action = ev.getActionMasked();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-
-                lastTouchX = x;
-                lastTouchY = y;
 
                 activePointerId = ev.getPointerId(pointerIndex);
                 final boolean isTouchingBar = isPointTouchingBar(bounds, (thickness * 2), x, y);
@@ -594,15 +611,7 @@ public class CircularProgressView extends View {
                     setProgress(newProgress);
                 }
 
-                //Log.d(getClass().getSimpleName(), "view.x = " + getX());
-                //Log.d(getClass().getSimpleName(), "view.y = " + getY());
-                //Log.d(getClass().getSimpleName(), "bounds.x = " + bounds.left);
-                //Log.d(getClass().getSimpleName(), "bounds.y = " + bounds.top);
-                //Log.d(getClass().getSimpleName(), "bounds.width = " + (bounds.left + bounds.right));
-                //Log.d(getClass().getSimpleName(), "bounds.height = " + (bounds.top + bounds.bottom));
-                //
-                //Log.d(getClass().getSimpleName(), "touch.x = " + ev.getX());
-                //Log.d(getClass().getSimpleName(), "touch.y = " + ev.getY());
+                drawTrackingDot = true;
 
                 // calculate if the initial touch event is on the progress bar
                 // if not return false to pass on the touch event
@@ -618,6 +627,8 @@ public class CircularProgressView extends View {
             case MotionEvent.ACTION_UP:
 
                 activePointerId = INVALID_POINTER_ID;
+                drawTrackingDot = false;
+                invalidate();
                 return true;
 
         }
@@ -632,6 +643,7 @@ public class CircularProgressView extends View {
     private static float radiansToDegrees(float value) {
         return (float) (value * 180.0 / Math.PI);
     }
+    private static float degreesToRadians(float value) { return (float) (value * Math.PI / 180.0); }
 
     private static float angle( final Point centre, final Point vertical, final Point touch) {
 
@@ -659,8 +671,6 @@ public class CircularProgressView extends View {
         final float dist = (float)Math.sqrt((xDist * xDist) + (yDist * yDist));
 
         Log.d(getClass().getSimpleName(), "distance = " + dist);
-
-
 
         return dist <= radius && dist >= (radius - thickness);
     }

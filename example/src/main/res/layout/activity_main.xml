@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,57 +7,79 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    android:weightSum="3"
     tools:context=".MainActivity">
 
-    <ProgressBar
-        android:id="@+id/native_progress_bar"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"
-        android:indeterminate="true" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/native_progress_bar"
-        android:layout_centerHorizontal="true"
-        android:text="Native ProgressBar" />
+        <ProgressBar
+            android:id="@+id/native_progress_bar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerHorizontal="true"
+            android:indeterminate="true" />
 
-    <com.github.rahatarmanahmed.cpv.CircularProgressView
-        android:id="@+id/progress_view"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:padding="0dp"
-        app:cpv_animAutostart="false"
-        app:cpv_progress="100"
-        app:cpv_indeterminate="false"
-        app:cpv_thickness="4dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/native_progress_bar"
+            android:layout_centerHorizontal="true"
+            android:text="Native ProgressBar" />
 
-    <TextView
-        android:id="@+id/progress_view_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/progress_view"
-        android:layout_centerHorizontal="true"
-        android:text="CircularProgressView" />
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/progress_view_label"
-        android:layout_centerHorizontal="true"
-        android:text="Switch to Determinate" />
+    </LinearLayout>
 
-    <Button
-        android:id="@+id/bgColorButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/button"
-        android:layout_centerHorizontal="true"
-        android:text="Toggle Background" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:gravity="center"
+        android:orientation="vertical"
+        >
 
-</RelativeLayout>
+        <com.github.rahatarmanahmed.cpv.CircularProgressView
+            android:id="@+id/progress_view"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:padding="0dp"
+            app:cpv_animAutostart="false"
+            app:cpv_progress="100"
+            app:cpv_indeterminate="false"
+            app:cpv_thickness="4dp" />
+
+        <TextView
+            android:id="@+id/progress_view_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/progress_view"
+            android:layout_centerHorizontal="true"
+            android:text="CircularProgressView" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/progress_view_label"
+            android:layout_centerHorizontal="true"
+            android:text="Switch to Determinate" />
+
+        <Button
+            android:id="@+id/bgColorButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/button"
+            android:layout_centerHorizontal="true"
+            android:text="Toggle Background" />
+
+    </LinearLayout>
+
+</LinearLayout>
