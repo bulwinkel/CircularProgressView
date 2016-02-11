@@ -301,8 +301,6 @@ public class CircularProgressView extends View {
         invalidate();
     }
 
-
-
     /**
      * Gets the progress value considered to be 100% of the progress bar.
      * @return the maximum progress
@@ -598,7 +596,6 @@ public class CircularProgressView extends View {
         final Point touch = Point.of(x, y);
 
         float degrees = angle(center, vertical, touch);
-        Log.d(getClass().getSimpleName(), "degrees = " + degrees);
 
         //// calculate the point for the tracking dot
         final float radius = bounds.centerX() - thickness;
