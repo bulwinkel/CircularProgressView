@@ -72,6 +72,13 @@ public class MainActivity extends Activity {
                 progressView.setProgressBackgroundColorEnabled(!progressView.isProgressBackgroundColorEnabled());
             }
         });
+
+        final Button progAdjustableButton = (Button) findViewById(R.id.progAdjustableButton);
+        progAdjustableButton.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                progressView.setProgressAdjustable(!progressView.isProgressAdjustable());
+            }
+        });
     }
 
     private void startAnimationThreadStuff(long delay) {

@@ -36,6 +36,7 @@ public class CircularProgressView extends View {
     private RectF bounds;
 
     private boolean bgColorEnabled = false;
+    private boolean progressAdjustable = false;
 
     private boolean isIndeterminate, autostartAnimation;
     private float currentProgress, maxProgress, indeterminateSweep, indeterminateRotateOffset;
@@ -136,6 +137,9 @@ public class CircularProgressView extends View {
                 resources.getInteger(R.integer.cpv_default_anim_sync_duration));
         animSteps = a.getInteger(R.styleable.CircularProgressView_cpv_animSteps,
                 resources.getInteger(R.integer.cpv_default_anim_steps));
+
+        progressAdjustable = a.getBoolean(R.styleable.CircularProgressView_cpv_progressAdjustable, false);
+
         a.recycle();
     }
 
@@ -374,6 +378,12 @@ public class CircularProgressView extends View {
         }
     }
 
+    public boolean isProgressAdjustable() { return progressAdjustable; }
+
+    public void setProgressAdjustable(boolean value) {
+        progressAdjustable = value;
+    }
+
     /**
      * Register a CircularProgressViewListener with this View
      * @param listener The listener to register
@@ -577,7 +587,7 @@ public class CircularProgressView extends View {
     @Override public boolean onTouchEvent(MotionEvent ev) {
 
         //GUARD - no touch events when indeterminate
-        if (isIndeterminate()) return false;
+        if (!progressAdjustable || isIndeterminate()) return false;
 
         final int pointerIndex = ev.getActionIndex();
         final float x = ev.getX(pointerIndex);
