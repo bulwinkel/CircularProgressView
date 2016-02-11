@@ -590,7 +590,9 @@ public class CircularProgressView extends View {
                 Log.d(getClass().getSimpleName(), "isTouchingBar: " + isTouchingBar);
 
                 //// set the progress based on the touch event
-                setProgress(newProgress);
+                if (isTouchingBar) {
+                    setProgress(newProgress);
+                }
 
                 //Log.d(getClass().getSimpleName(), "view.x = " + getX());
                 //Log.d(getClass().getSimpleName(), "view.y = " + getY());
