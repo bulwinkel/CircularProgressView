@@ -45,6 +45,14 @@ public class MainActivity extends Activity {
             public void onModeChanged(boolean isIndeterminate) {
                 Log.d("CPV", "onModeChanged: " + (isIndeterminate ? "indeterminate" : "determinate"));
             }
+
+            @Override public void onStartSeek() {
+                Log.d("CPV", "onStartSeek");
+            }
+
+            @Override public void onStopSeek() {
+                Log.d("CPV", "onStopSeek");
+            }
         });
 
         // Test loading animation
