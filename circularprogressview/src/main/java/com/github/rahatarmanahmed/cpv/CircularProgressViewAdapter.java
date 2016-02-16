@@ -24,4 +24,14 @@ public class CircularProgressViewAdapter implements CircularProgressViewListener
     public void onModeChanged(boolean isIndeterminate) {
 
     }
+
+    @Override
+    public void onStartSeek() {
+
+    }
+
+    @Override
+    public void onStopSeek() {
+
+    }
 }

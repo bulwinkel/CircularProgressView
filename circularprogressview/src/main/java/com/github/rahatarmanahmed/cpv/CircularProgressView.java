@@ -626,6 +626,10 @@ public class CircularProgressView extends View {
                 //// set the progress based on the touch event
                 drawTrackingDot = isTouchingBar;
                 if (isTouchingBar) {
+                    // notify observers that starting seek
+                    for(CircularProgressViewListener listener : listeners) {
+                        listener.onStartSeek();
+                    }
                     setProgress(newProgress);
                 }
 
@@ -645,6 +649,11 @@ public class CircularProgressView extends View {
                 activePointerId = INVALID_POINTER_ID;
                 drawTrackingDot = false;
                 invalidate();
+
+                // notify observers that seek complete
+                for(CircularProgressViewListener listener : listeners) {
+                    listener.onStopSeek();
+                }
                 return true;
 
         }
@@ -690,4 +699,5 @@ public class CircularProgressView extends View {
 
         return (radius - leeway) <= dist && dist <= (radius + leeway);
     }
+
 }

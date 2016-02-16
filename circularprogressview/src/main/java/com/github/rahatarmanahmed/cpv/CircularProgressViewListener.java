@@ -29,4 +29,8 @@ public interface CircularProgressViewListener {
      * @param isIndeterminate true if mode was set to indeterminate, false otherwise.
      */
     void onModeChanged(boolean isIndeterminate);
+
+    void onStartSeek();
+
+    void onStopSeek();
 }
