@@ -630,7 +630,7 @@ public class CircularProgressView extends View {
                     for(CircularProgressViewListener listener : listeners) {
                         listener.onStartSeek();
                     }
-                    setProgress(newProgress);
+                    setProgress(newProgress, false);
                 }
 
                 // calculate if the initial touch event is on the progress bar
