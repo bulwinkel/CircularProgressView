@@ -211,6 +211,7 @@ public class CircularProgressView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        //Log.v(getClass().getSimpleName(), "onDraw ");
         super.onDraw(canvas);
 
         if (bgPaint != null) {
@@ -243,17 +244,15 @@ public class CircularProgressView extends View {
     /**
      * Sets whether this CircularProgressView is indeterminate or not.
      * It will reset the animation if the mode has changed.
-     * @param isIndeterminate True if indeterminate.
+     * @param newValue True if indeterminate.
      */
-    public void setIndeterminate(boolean isIndeterminate) {
-        boolean old = this.isIndeterminate;
-        boolean reset = this.isIndeterminate == isIndeterminate;
-        this.isIndeterminate = isIndeterminate;
-        if (reset)
+    public void setIndeterminate(boolean newValue) {
+        // only need to update things if the value has changed
+        if(this.isIndeterminate != newValue) {
+            this.isIndeterminate = newValue;
             resetAnimation();
-        if(old != isIndeterminate) {
             for(CircularProgressViewListener listener : listeners) {
-                listener.onModeChanged(isIndeterminate);
+                listener.onModeChanged(newValue);
             }
         }
     }
@@ -421,44 +420,56 @@ public class CircularProgressView extends View {
      * Resets the animation.
      */
     public void resetAnimation() {
+
         // Cancel all the old animators
-        if(startAngleRotate != null && startAngleRotate.isRunning())
+        if(startAngleRotate != null && startAngleRotate.isRunning()) {
             startAngleRotate.cancel();
-        if(progressAnimator != null && progressAnimator.isRunning())
+        }
+        if(progressAnimator != null && progressAnimator.isRunning()) {
             progressAnimator.cancel();
-        if(indeterminateAnimator != null && indeterminateAnimator.isRunning())
+        }
+        if(indeterminateAnimator != null && indeterminateAnimator.isRunning()) {
             indeterminateAnimator.cancel();
+        }
 
         // Determinate animation
         if(!isIndeterminate)
         {
+
+            currentProgress = 0;
+            actualProgress = 0;
+
+            //NOTE - this is partially causing the flashing on newer devices
+
             // The cool 360 swoop animation at the start of the animation
             startAngle = initialStartAngle;
-            startAngleRotate = ValueAnimator.ofFloat(startAngle, startAngle + 360);
-            startAngleRotate.setDuration(animSwoopDuration);
-            startAngleRotate.setInterpolator(new DecelerateInterpolator(2));
-            startAngleRotate.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    startAngle = (Float) animation.getAnimatedValue();
-                    invalidate();
-                }
-            });
-            startAngleRotate.start();
+            //startAngleRotate = ValueAnimator.ofFloat(startAngle, startAngle + 360);
+            //startAngleRotate.setDuration(animSwoopDuration);
+            //startAngleRotate.setInterpolator(new DecelerateInterpolator(2));
+            //startAngleRotate.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            //    @Override
+            //    public void onAnimationUpdate(ValueAnimator animation) {
+            //        startAngle = (Float) animation.getAnimatedValue();
+            //        invalidate();
+            //    }
+            //});
+            //startAngleRotate.start();
 
             // The linear animation shown when progress is updated
-            actualProgress = 0f;
-            progressAnimator = ValueAnimator.ofFloat(actualProgress, currentProgress);
-            progressAnimator.setDuration(animSyncDuration);
-            progressAnimator.setInterpolator(new LinearInterpolator());
-            progressAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    actualProgress = (Float) animation.getAnimatedValue();
-                    invalidate();
-                }
-            });
-            progressAnimator.start();
+            //actualProgress = 0f;
+            //progressAnimator = ValueAnimator.ofFloat(actualProgress, currentProgress);
+            //progressAnimator.setDuration(animSyncDuration);
+            //progressAnimator.setInterpolator(new LinearInterpolator());
+            //progressAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            //    @Override
+            //    public void onAnimationUpdate(ValueAnimator animation) {
+            //        actualProgress = (Float) animation.getAnimatedValue();
+            //        invalidate();
+            //    }
+            //});
+            //progressAnimator.start();
+
+            invalidate();
         }
         // Indeterminate animation
         else
@@ -582,6 +593,11 @@ public class CircularProgressView extends View {
             indeterminateAnimator.cancel();
             indeterminateAnimator = null;
         }
+    }
+
+    @Override public void invalidate() {
+        //Log.v(getClass().getSimpleName(), "invalidate");
+        super.invalidate();
     }
 
     // NOT SURE IF THIS IS A GOOD IDEA, NO IDEA WHAT VALID POINTER ID RANGE IS
